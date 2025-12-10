@@ -1,25 +1,38 @@
-name: Update Counter
+<div id="aurionCounter" style="
+    position:fixed;
+    bottom:20px;
+    left:20px;
+    color:#7ecbff;
+    font-family:'Segoe UI',sans-serif;
+    background:rgba(0,0,15,0.55);
+    padding:8px 14px;
+    border:1px solid #7ecbff44;
+    border-radius:12px;
+    box-shadow:0 0 12px #7ecbff55;
+    backdrop-filter:blur(6px);
+    z-index:9999;
+">
+    Lädt…
+</div>
 
-on:
-  repository_dispatch:
-    types: [increase_counter]
+<script>
+(async () => {
+  const url = "https://doerkys-bot.github.io/aurion-counter/counter.json";
 
-jobs:
-  update_counter:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+  try {
+    const res = await fetch(url + "?_=" + Date.now());
+    if (!res.ok) throw new Error("HTTP " + res.status);
 
-      - name: Increase counter
-        run: |
-          count=$(jq '.visits + 1' counter.json)
-          echo "{\"visits\": $count}" > counter.json
+    const data = await res.json();
+    const visits = data.visits || 0;
 
-      - name: Commit change
-        run: |
-          git config --global user.email "counter@automation"
-          git config --global user.name "Counter Bot"
-          git add counter.json
-          git commit -m "Increase counter"
-          git push
+    document.getElementById("aurionCounter").textContent =
+      "Vorhof-Zugriffe: " + visits;
+
+  } catch (err) {
+    document.getElementById("aurionCounter").textContent =
+      "Counter-Fehler";
+    console.error(err);
+  }
+})();
+</script>
