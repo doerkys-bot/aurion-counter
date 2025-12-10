@@ -1,0 +1,25 @@
+name: Update Counter
+
+on:
+  repository_dispatch:
+    types: [increase_counter]
+
+jobs:
+  update_counter:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Increase counter
+        run: |
+          count=$(jq '.visits + 1' counter.json)
+          echo "{\"visits\": $count}" > counter.json
+
+      - name: Commit change
+        run: |
+          git config --global user.email "counter@automation"
+          git config --global user.name "Counter Bot"
+          git add counter.json
+          git commit -m "Increase counter"
+          git push
