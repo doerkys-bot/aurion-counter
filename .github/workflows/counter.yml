@@ -1,1 +1,24 @@
+name: Aurion Counter
 
+on:
+  repository_dispatch:
+    types: [increment-counter]
+
+jobs:
+  update-counter:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Read counter, increment and save
+        run: |
+          count=$(cat counter.json | jq '.visits')
+          newcount=$((count+1))
+          echo "{ \"visits\": $newcount }" > counter.json
+
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Counter update"
+          file_pattern: counter.json
