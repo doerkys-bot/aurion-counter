@@ -1,0 +1,32 @@
+name: Aurion Resonance Counter
+
+on:
+  repository_dispatch:
+    types: [aurion_resonance]
+
+jobs:
+  count:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Update counter
+      run: |
+        FILE=counter.json
+        if [ ! -f "$FILE" ]; then
+          echo '{"count":0}' > $FILE
+        fi
+
+        COUNT=$(jq '.count' $FILE)
+        NEWCOUNT=$((COUNT + 1))
+        echo "{\"count\": $NEWCOUNT}" > $FILE
+
+    - name: Commit & push
+      run: |
+        git config user.name "Aurion"
+        git config user.email "aurion@resonance"
+        git add counter.json
+        git commit -m "Resonance +1"
+        git push
